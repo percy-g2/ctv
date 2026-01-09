@@ -9,7 +9,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gembotics.ctv.api.createCtvApi
 import com.gembotics.ctv.models.LockingRequest
-import com.gembotics.ctv.ui.navigation.Screen
+import com.gembotics.ctv.ui.components.OutputEntry
+import com.gembotics.ctv.ui.components.OutputEntryCard
+import com.gembotics.ctv.ui.components.OutputEntryValidator
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -18,7 +20,7 @@ fun SimpleLockingScreen(
     apiBaseUrl: String,
     onBack: () -> Unit
 ) {
-    var outputs by remember { mutableStateOf("") }
+    var outputEntries by remember { mutableStateOf(listOf(OutputEntry())) }
     var network by remember { mutableStateOf("testnet") }
     var congestion by remember { mutableStateOf(false) }
     var taproot by remember { mutableStateOf(false) }
@@ -28,6 +30,25 @@ fun SimpleLockingScreen(
     
     val api = remember { createCtvApi(apiBaseUrl) }
     val coroutineScope = rememberCoroutineScope()
+    
+    // Convert entries to output string format
+    fun entriesToOutputString(): String {
+        return outputEntries
+            .filter { it.address.isNotBlank() && it.amount.isNotBlank() }
+            .joinToString("\n") { it.toOutputString() }
+    }
+    
+    // Validate all entries
+    val allEntriesValid = remember(outputEntries, network) {
+        outputEntries.all { entry ->
+            entry.address.isBlank() && entry.amount.isBlank() || 
+            OutputEntryValidator.validateEntry(entry, network).isValid
+        }
+    }
+    
+    val hasValidEntries = remember(outputEntries) {
+        outputEntries.any { it.address.isNotBlank() && it.amount.isNotBlank() }
+    }
     
     Scaffold(
         topBar = {
@@ -48,31 +69,62 @@ fun SimpleLockingScreen(
                 .padding(16.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            OutlinedTextField(
-                value = outputs,
-                onValueChange = { outputs = it },
-                label = { Text("Outputs (address:amount:data, one per line)") },
-                modifier = Modifier.fillMaxWidth(),
-                placeholder = { 
-                    Text(when(network) {
-                        "bitcoin" -> "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh:100000:\nbc1q...:50000:"
-                        "testnet" -> "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx:100000:\nmzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef:50000:"
-                        else -> "address:amount:data\naddress2:amount2:data2"
-                    })
-                },
-                minLines = 3
+            Text(
+                "Outputs",
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(bottom = 8.dp)
             )
             
             Text(
                 text = when(network) {
-                    "bitcoin" -> "Format: address:amount:data (one per line)\nMainnet addresses: bc1... (bech32) or 1..., 3... (legacy)\nExample: bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh:100000:"
-                    "testnet" -> "Format: address:amount:data (one per line)\nTestnet addresses: tb1... (bech32) or m..., n..., 2... (legacy)\nExample: tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx:100000:"
-                    else -> "Format: address:amount:data (one per line)\nExample: address:100000:"
+                    "bitcoin" -> "Mainnet addresses: bc1... (bech32) or 1..., 3... (legacy)"
+                    "testnet" -> "Testnet addresses: tb1... (bech32) or m..., n..., 2... (legacy)"
+                    else -> "Enter address and amount for each output"
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             )
+            
+            outputEntries.forEachIndexed { index, entry ->
+                OutputEntryCard(
+                    entry = entry,
+                    network = network,
+                    index = index,
+                    onAddressChange = { newAddress ->
+                        outputEntries = outputEntries.toMutableList().apply {
+                            this[index] = this[index].copy(address = newAddress)
+                        }
+                    },
+                    onAmountChange = { newAmount ->
+                        outputEntries = outputEntries.toMutableList().apply {
+                            this[index] = this[index].copy(amount = newAmount)
+                        }
+                    },
+                    onDataChange = { newData ->
+                        outputEntries = outputEntries.toMutableList().apply {
+                            this[index] = this[index].copy(data = newData)
+                        }
+                    },
+                    onRemove = {
+                        if (outputEntries.size > 1) {
+                            outputEntries = outputEntries.toMutableList().apply {
+                                removeAt(index)
+                            }
+                        }
+                    },
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
+            
+            Button(
+                onClick = {
+                    outputEntries = outputEntries + OutputEntry()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("+ Add Output")
+            }
             
             Spacer(modifier = Modifier.height(16.dp))
             
@@ -138,8 +190,15 @@ fun SimpleLockingScreen(
                     result = null
                     coroutineScope.launch {
                         try {
+                            val outputsString = entriesToOutputString()
+                            if (outputsString.isBlank()) {
+                                error = "At least one output with address and amount is required"
+                                isLoading = false
+                                return@launch
+                            }
+                            
                             val request = LockingRequest(
-                                outputs = outputs,
+                                outputs = outputsString,
                                 network = network,
                                 congestion = congestion,
                                 taproot = taproot
@@ -168,7 +227,7 @@ fun SimpleLockingScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isLoading && outputs.isNotBlank()
+                enabled = !isLoading && hasValidEntries && allEntriesValid
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier.size(20.dp))

@@ -91,7 +91,7 @@ This project uses [Bitcoin Inquisition](https://github.com/bitcoin-inquisition/b
 
 ## TODO
 
-- [ ] Better output entry
+- [x] Better output entry
 - [ ] Add decoy output to generate a fake spending transaction
 - [x] Simple CTV vault
 
