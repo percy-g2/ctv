@@ -24,9 +24,9 @@ pub async fn server() -> anyhow::Result<()> {
             axum::routing::post(vaults::unvaulting),
         )
         .route("/vaults/spending", axum::routing::post(vaults::spending));
-    let listener = TcpListener::bind("localhost:5555").await?;
+    let listener = TcpListener::bind("localhost:3000").await?;
 
-    tracing::info!("Starting server on localhost:5555");
+    tracing::info!("Starting server on localhost:3000");
     axum::serve(listener, app).await?;
     Ok(())
 }

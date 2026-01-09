@@ -1,0 +1,39 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Local configuration
+local.properties
+*.local.properties
+
+# Compiled files
+*.class
+*.dex
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Generated files
+**/generated/
+**/intermediates/
+**/outputs/
+**/tmp/
+**/kotlinProjectStructureMetadata/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

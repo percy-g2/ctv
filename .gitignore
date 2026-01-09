@@ -2,3 +2,21 @@
 .envrc
 node_modules/
 .mise.local.toml
+
+# Mobile (Android/Kotlin Multiplatform) build artifacts
+mobile/**/build/
+mobile/.gradle/
+mobile/.idea/
+mobile/local.properties
+mobile/**/*.apk
+mobile/**/*.dex
+mobile/**/classes/
+mobile/**/intermediates/
+mobile/**/outputs/
+mobile/**/tmp/
+mobile/**/generated/
+mobile/**/kotlinProjectStructureMetadata/
+
+# macOS
+.DS_Store
+**/.DS_Store
