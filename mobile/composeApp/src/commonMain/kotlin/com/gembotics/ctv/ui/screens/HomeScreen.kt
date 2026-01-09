@@ -41,5 +41,14 @@ fun HomeScreen(
         ) {
             Text("CTV Vaults")
         }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Button(
+            onClick = { onNavigate(Screen.TestCases) },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Run Test Cases")
+        }
     }
 }

@@ -28,4 +28,8 @@ dependencies {
     implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
+    testImplementation(libs.ktor.clientCore)
+    testImplementation(libs.ktor.clientJava)
+    testImplementation(libs.ktor.clientContentNegotiation)
+    testImplementation(libs.ktor.clientSerializationKotlinxJson)
 }

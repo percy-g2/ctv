@@ -68,6 +68,12 @@ fun App() {
                     onBack = { currentScreen = Screen.Vaults }
                 )
             }
+            is Screen.TestCases -> {
+                TestCasesScreen(
+                    apiBaseUrl = apiBaseUrl,
+                    onBack = { currentScreen = Screen.Home }
+                )
+            }
         }
     }
 }

@@ -10,4 +10,5 @@ sealed class Screen(val route: String) {
     object VaultUnvaulting : Screen("vault_unvaulting")
     object VaultSpending : Screen("vault_spending")
     object VaultVerification : Screen("vault_verification")
+    object TestCases : Screen("test_cases")
 }
