@@ -21,10 +21,10 @@ fun VaultVaultingScreen(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var amount by remember { mutableStateOf("1000000") }
-    var coldAddress by remember { mutableStateOf("mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef") }
-    var hotAddress by remember { mutableStateOf("mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef") }
-    var blockDelay by remember { mutableStateOf("144") }
+    var amount by remember { mutableStateOf("") }
+    var coldAddress by remember { mutableStateOf("") }
+    var hotAddress by remember { mutableStateOf("") }
+    var blockDelay by remember { mutableStateOf("") }
     var network by remember { mutableStateOf("testnet") }
     var taproot by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }

@@ -23,8 +23,8 @@ fun VaultVerificationScreen(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var vaultContext by remember { mutableStateOf("{\"hotAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"coldAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"amount\":\"1000000\",\"network\":\"testnet\",\"blockDelay\":144,\"taproot\":false}") }
-    var txHex by remember { mutableStateOf("0100000000010100000000000000000000000000000000000000000000000000000000000000000000000021002058626fd9e17eefcd16f7499f0b2687ba359692838b702e185c144d894ae3e4ffffffff01e83f0f00000000001976a914432c6152a179b6988757eaf7733693e1bceb425888ac02203a4074350970f6314f6c95fa881a55ddf51c68768c8c3d9033db8016e02eb3f6234c203a4074350970f6314f6c95fa881a55ddf51c68768c8c3d9033db8016e02eb3f6b300000000") }
+    var vaultContext by remember { mutableStateOf("") }
+    var txHex by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<VaultVerificationResponse?>(null) }
     var error by remember { mutableStateOf<String?>(null) }

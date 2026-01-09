@@ -21,9 +21,9 @@ fun VaultUnvaultingScreen(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var vaultContext by remember { mutableStateOf("{\"hotAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"coldAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"amount\":\"1000000\",\"network\":\"testnet\",\"blockDelay\":144,\"taproot\":false}") }
-    var txid by remember { mutableStateOf("0000000000000000000000000000000000000000000000000000000000000000") }
-    var vout by remember { mutableStateOf("0") }
+    var vaultContext by remember { mutableStateOf("") }
+    var txid by remember { mutableStateOf("") }
+    var vout by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }

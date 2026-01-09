@@ -21,20 +21,9 @@ fun SimpleSpendingScreen(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var ctvContext by remember { 
-        mutableStateOf("""{
-  "network": "testnet",
-  "ctvHash": "0000000000000000000000000000000000000000000000000000000000000000",
-  "outputs": [
-    {
-      "amount": 100000,
-      "scriptPubKey": "0014a614f932bca755511350f1db7b85e1a549cdf068"
-    }
-  ]
-}""".trimIndent())
-    }
-    var txid by remember { mutableStateOf("0000000000000000000000000000000000000000000000000000000000000000") }
-    var vout by remember { mutableStateOf("0") }
+    var ctvContext by remember { mutableStateOf("") }
+    var txid by remember { mutableStateOf("") }
+    var vout by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }

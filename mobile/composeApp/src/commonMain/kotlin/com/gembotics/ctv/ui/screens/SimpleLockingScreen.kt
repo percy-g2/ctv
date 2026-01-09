@@ -24,15 +24,10 @@ fun SimpleLockingScreen(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var outputEntries by remember { 
-        mutableStateOf(listOf(
-            OutputEntry(address = "tb1qw508d6qejxtdg4y5r3zarvary0c5xw7kxpjzsx", amount = "100000", data = ""),
-            OutputEntry(address = "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef", amount = "50000", data = "")
-        )) 
-    }
+    var outputEntries by remember { mutableStateOf(listOf(OutputEntry())) }
     var network by remember { mutableStateOf("testnet") }
     var congestion by remember { mutableStateOf(false) }
-    var taproot by remember { mutableStateOf(true) }
+    var taproot by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }

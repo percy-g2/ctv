@@ -21,8 +21,8 @@ fun VaultSpendingScreen(
     onBack: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    var vaultContext by remember { mutableStateOf("{\"hotAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"coldAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"amount\":\"1000000\",\"network\":\"testnet\",\"blockDelay\":144,\"taproot\":false}") }
-    var unvaultingTxid by remember { mutableStateOf("36f367f9be45293741d9d4622325dffec5cce38607e76f7778c7c2c7947f493f") }
+    var vaultContext by remember { mutableStateOf("") }
+    var unvaultingTxid by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<String?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
