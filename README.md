@@ -414,6 +414,58 @@ curl -X POST http://localhost:8080/vaults/spending \
 }
 ```
 
+**Save the `coldTx` and `hotTx` values for Tests 6 and 7.**
+
+---
+
+##### Test 6: Verify Cold Spend Transaction
+
+Verifies that a cold spend transaction is valid. Cold spend transactions can be broadcast immediately (no delay required).
+
+```bash
+# Replace YOUR_VAULT_JSON and COLD_TX_HEX with values from Tests 1 and 5
+curl -X POST http://localhost:8080/vaults/verification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": YOUR_VAULT_JSON,
+    "tx": "COLD_TX_HEX"
+  }' | python3 -m json.tool
+```
+
+**Expected Response**:
+```json
+{
+    "transactionType": "ColdSpend",
+    "valid": true,
+    "message": "Transaction is a valid cold spend transaction"
+}
+```
+
+---
+
+##### Test 7: Verify Hot Spend Transaction
+
+Verifies that a hot spend transaction is valid. Hot spend transactions require waiting for the block delay before broadcasting.
+
+```bash
+# Replace YOUR_VAULT_JSON and HOT_TX_HEX with values from Tests 1 and 5
+curl -X POST http://localhost:8080/vaults/verification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": YOUR_VAULT_JSON,
+    "tx": "HOT_TX_HEX"
+  }' | python3 -m json.tool
+```
+
+**Expected Response**:
+```json
+{
+    "transactionType": "HotSpend",
+    "valid": true,
+    "message": "Transaction is a valid hot spend transaction"
+}
+```
+
 ---
 
 ### Automated Test Script
@@ -470,6 +522,40 @@ curl -s -X POST http://localhost:8080/simple/locking \
     "congestion": false,
     "taproot": false
   }' | python3 -m json.tool
+echo ""
+
+UNVAULT_TXID=$(echo $UNVAULT_RESPONSE | python3 -c "import sys, json; print(json.load(sys.stdin)['txid'])")
+
+echo "=== Test 5: Vault Spending ==="
+SPEND_RESPONSE=$(curl -s -X POST http://localhost:8080/vaults/spending \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"vault\": $VAULT_JSON,
+    \"txid\": \"$UNVAULT_TXID\",
+    \"type\": \"cold\"
+  }")
+echo "$SPEND_RESPONSE" | python3 -m json.tool
+echo ""
+
+COLD_TX=$(echo $SPEND_RESPONSE | python3 -c "import sys, json; print(json.load(sys.stdin)['coldTx'])")
+HOT_TX=$(echo $SPEND_RESPONSE | python3 -c "import sys, json; print(json.load(sys.stdin)['hotTx'])")
+
+echo "=== Test 6: Verify Cold Spend ==="
+curl -s -X POST http://localhost:8080/vaults/verification \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"vault\": $VAULT_JSON,
+    \"tx\": \"$COLD_TX\"
+  }" | python3 -m json.tool
+echo ""
+
+echo "=== Test 7: Verify Hot Spend ==="
+curl -s -X POST http://localhost:8080/vaults/verification \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"vault\": $VAULT_JSON,
+    \"tx\": \"$HOT_TX\"
+  }" | python3 -m json.tool
 ```
 
 Make it executable and run:
