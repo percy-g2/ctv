@@ -24,6 +24,8 @@ dependencies {
     implementation(libs.ktor.serverCors)
     implementation(libs.kotlinx.serializationJson)
     implementation(libs.bitcoinj)
+    // BouncyCastle for RIPEMD160 support (workaround for bitcoinj hash160 bug)
+    implementation("org.bouncycastle:bcprov-jdk18on:1.78.1")
     testImplementation(libs.ktor.serverTestHost)
     testImplementation(libs.kotlin.testJunit)
 }

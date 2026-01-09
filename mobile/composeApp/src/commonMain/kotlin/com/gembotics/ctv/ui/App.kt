@@ -62,6 +62,12 @@ fun App() {
                     onBack = { currentScreen = Screen.Vaults }
                 )
             }
+            is Screen.VaultVerification -> {
+                VaultVerificationScreen(
+                    apiBaseUrl = apiBaseUrl,
+                    onBack = { currentScreen = Screen.Vaults }
+                )
+            }
         }
     }
 }

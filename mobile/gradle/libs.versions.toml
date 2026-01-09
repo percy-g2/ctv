@@ -39,7 +39,7 @@ ktor-clientJava = { module = "io.ktor:ktor-client-java", version.ref = "ktor" }
 ktor-clientContentNegotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-clientSerializationKotlinxJson = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 kotlinx-serializationJson = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.7.3" }
-bitcoinj = { module = "org.bitcoinj:bitcoinj-core", version = "0.16.1" }
+bitcoinj = { module = "org.bitcoinj:bitcoinj-core", version = "0.17" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -20,6 +20,7 @@ interface CtvApi {
     suspend fun vaultVaulting(request: VaultingRequest): VaultingResponse
     suspend fun vaultUnvaulting(request: UnvaultingRequest): UnvaultingResponse
     suspend fun vaultSpending(request: VaultSpendingRequest): VaultSpendingResponse
+    suspend fun vaultVerification(request: VaultVerificationRequest): VaultVerificationResponse
 }
 
 /**
@@ -62,6 +63,13 @@ class CtvApiImpl(private val baseUrl: String) : CtvApi {
     
     override suspend fun vaultSpending(request: VaultSpendingRequest): VaultSpendingResponse {
         return client.post("$baseUrl/vaults/spending") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body()
+    }
+    
+    override suspend fun vaultVerification(request: VaultVerificationRequest): VaultVerificationResponse {
+        return client.post("$baseUrl/vaults/verification") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()

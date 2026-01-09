@@ -46,3 +46,16 @@ data class VaultSpendingResponse(
     val coldTx: String, // Hex-encoded cold transaction
     val hotTx: String // Hex-encoded hot transaction
 )
+
+@Serializable
+data class VaultVerificationRequest(
+    val vault: String, // JSON string of vault
+    val tx: String // Hex-encoded transaction to verify
+)
+
+@Serializable
+data class VaultVerificationResponse(
+    val transactionType: String, // "Unvaulting", "ColdSpend", "HotSpend"
+    val valid: Boolean,
+    val message: String
+)

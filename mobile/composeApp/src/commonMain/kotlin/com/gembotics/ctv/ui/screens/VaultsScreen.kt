@@ -58,6 +58,15 @@ fun VaultsScreen(
             ) {
                 Text("Spend from Vault")
             }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = { onNavigate(Screen.VaultVerification) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Verify Vault Transaction")
+            }
         }
     }
 }

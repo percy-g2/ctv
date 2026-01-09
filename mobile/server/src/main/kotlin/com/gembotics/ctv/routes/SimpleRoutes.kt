@@ -8,10 +8,10 @@ import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import org.bitcoinj.core.Address as BitcoinAddress
-import org.bitcoinj.core.Coin
+import org.bitcoinj.base.Address as BitcoinAddress
+import org.bitcoinj.base.Coin
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.core.Sha256Hash
+import org.bitcoinj.base.Sha256Hash
 import org.bitcoinj.script.ScriptBuilder
 import kotlinx.serialization.json.*
 import java.math.BigInteger

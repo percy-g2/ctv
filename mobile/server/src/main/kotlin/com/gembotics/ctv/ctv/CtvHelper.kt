@@ -1,17 +1,18 @@
 package com.gembotics.ctv.ctv
 
-import org.bitcoinj.core.Address as BitcoinAddress
-import org.bitcoinj.core.Coin
-import org.bitcoinj.core.LegacyAddress
+import org.bitcoinj.base.Address as BitcoinAddress
+import org.bitcoinj.base.Coin
+import org.bitcoinj.base.LegacyAddress
 import org.bitcoinj.core.NetworkParameters
-import org.bitcoinj.core.Sha256Hash
+import org.bitcoinj.base.Sha256Hash
 import org.bitcoinj.core.Transaction
+import org.bitcoinj.core.Context
 import org.bitcoinj.core.TransactionInput
 import org.bitcoinj.core.TransactionOutPoint
 import org.bitcoinj.core.TransactionOutput
 import org.bitcoinj.core.TransactionWitness
 import org.bitcoinj.core.Utils
-import org.bitcoinj.core.Base58
+import org.bitcoinj.base.Base58
 import org.bitcoinj.script.Script
 import org.bitcoinj.script.ScriptBuilder
 import org.bitcoinj.script.ScriptOpCodes
@@ -134,10 +135,29 @@ object CtvHelper {
      * Create CTV locking script (P2WSH)
      */
     fun createCtvLockingScript(ctvHash: ByteArray, params: NetworkParameters): Script {
-        return ScriptBuilder()
-            .data(ctvHash)
-            .op(ScriptOpCodes.OP_NOP4) // OP_CTV (currently OP_NOP4)
-            .build()
+        // Validate CTV hash size (must be exactly 32 bytes)
+        if (ctvHash.size != 32) {
+            throw IllegalArgumentException("CTV hash must be exactly 32 bytes, got ${ctvHash.size}")
+        }
+        
+        return try {
+            // Workaround for bitcoinj 0.16.1 bug with 32-byte pushes
+            // Manually construct script bytes to avoid the bug
+            val scriptBytes = mutableListOf<Byte>()
+            
+            // Push CTV hash (32 bytes) - workaround: use OP_PUSHDATA1 for 32 bytes
+            // This avoids the bug with direct push opcode 0x20
+            scriptBytes.add(0x4c.toByte()) // OP_PUSHDATA1
+            scriptBytes.add(32) // Length: 32 bytes
+            scriptBytes.addAll(ctvHash.copyOf(32).toList())
+            
+            // OP_NOP4 (OP_CTV)
+            scriptBytes.add(ScriptOpCodes.OP_NOP4.toByte())
+            
+            Script(scriptBytes.toByteArray())
+        } catch (e: Exception) {
+            throw IllegalArgumentException("Error building CTV locking script: ${e.message}. CTV hash size: ${ctvHash.size}", e)
+        }
     }
     
     /**
@@ -145,21 +165,32 @@ object CtvHelper {
      */
     fun createCtvAddress(ctvHash: ByteArray, params: NetworkParameters): BitcoinAddress {
         val ctvScript = createCtvLockingScript(ctvHash, params)
-        val p2wshScript = ScriptBuilder.createP2WSHOutputScript(ctvScript)
-        // In bitcoinj 0.16.1, create P2WSH address from script hash
-        // P2WSH uses SHA256, not hash160 - but LegacyAddress.fromP2SHHash expects hash160
-        // For now, create address from script directly (workaround)
-        // In bitcoinj 0.16.1, create P2WSH address manually from script hash
-        // P2WSH uses SHA256 hash of the script
-        val scriptBytes = p2wshScript.getProgram()
+        
+        // Manually create P2WSH output script to avoid bitcoinj bug
+        // P2WSH: OP_0 <32-byte-script-hash>
+        val ctvScriptBytes = ctvScript.program
         val sha256 = MessageDigest.getInstance("SHA-256")
-        val scriptHash = sha256.digest(scriptBytes)
+        val scriptHash = sha256.digest(ctvScriptBytes)
+        
         // Create address from hash160 of SHA256 hash (workaround - using P2SH format)
-        val hash160 = Utils.sha256hash160(scriptHash)
-        // Create LegacyAddress from P2SH hash
-        // In bitcoinj 0.16.1, create address from hash using Address.fromString
-        // First create the P2SH address string, then parse it
-        // This is a workaround since fromP2SHHash doesn't exist in 0.16.1
+        // hash160 = RIPEMD160(SHA256(script))
+        // We already have SHA256 (scriptHash), so compute RIPEMD160 manually using BouncyCastle
+        val hash160 = try {
+            val ripemd160 = MessageDigest.getInstance("RIPEMD160", "BC")
+            ripemd160.update(scriptHash)
+            ripemd160.digest()
+        } catch (e: Exception) {
+            try {
+                val ripemd160 = MessageDigest.getInstance("RIPEMD160")
+                ripemd160.update(scriptHash)
+                ripemd160.digest()
+            } catch (e2: Exception) {
+                throw IllegalArgumentException("Failed to compute hash160 using RIPEMD160. " +
+                        "BouncyCastle error: ${e.message}, Default provider error: ${e2.message}. " +
+                        "Script size: ${ctvScriptBytes.size} bytes.", e)
+            }
+        }
+        // Create LegacyAddress from P2SH hash  
         val addressStr = Base58.encodeChecked(params.addressHeader, hash160)
         return BitcoinAddress.fromString(params, addressStr) as LegacyAddress
     }
@@ -174,28 +205,35 @@ object CtvHelper {
         outputs: List<CtvOutput>,
         params: NetworkParameters
     ): Transaction {
-        val tx = Transaction(params)
+        // bitcoinj 0.17: Transaction no longer takes NetworkParameters
+        // Set context instead
+        Context.propagate(Context(params))
+        val tx = Transaction()
         // Note: version might need to be set via constructor or might be immutable
         
-        // Create CTV script and P2WSH output script
+        // Create CTV script and manually create P2WSH output script to avoid bitcoinj bug
         val ctvScript = createCtvLockingScript(ctvHash, params)
-        val p2wshScript = ScriptBuilder.createP2WSHOutputScript(ctvScript)
+        val ctvScriptBytes = ctvScript.program
+        val sha256 = MessageDigest.getInstance("SHA-256")
+        val scriptHash = sha256.digest(ctvScriptBytes)
+        val p2wshScriptBytes = byteArrayOf(0x00) + scriptHash // OP_0 + 32-byte hash
         
-        // Add input
-        val outPoint = TransactionOutPoint(params, prevTxId.bytes, prevVout)
-        val input = TransactionInput(params, tx, p2wshScript.getProgram(), outPoint)
-        tx.addInput(input)
+        // Add input with witness
+        // bitcoinj 0.17: TransactionOutPoint takes (Long, Sha256Hash) - index first, then hash
+        val outPoint = TransactionOutPoint(prevVout.toLong(), prevTxId)
+        // bitcoinj 0.17: TransactionInput constructor changed
+        val input = TransactionInput(tx, p2wshScriptBytes, outPoint)
         
         // Create witness for CTV spend (CTV hash + OP_CTV script)
-        val witness = TransactionWitness(2)
-        witness.setPush(0, ctvHash)
-        witness.setPush(1, ctvScript.getProgram())
-        // In bitcoinj 0.16.1, set witness using connectOutput method or addWitness
-        // For now, we'll set it directly if the property exists
-        // Note: This may need adjustment based on actual bitcoinj 0.16.1 API
-        // In bitcoinj 0.16.1, witness needs to be set on the transaction
-        // Use getInput and setWitness method
-        tx.getInput(0)?.setWitness(witness)
+        // bitcoinj 0.17: TransactionWitness.of() instead of setPush()
+        val witness = TransactionWitness.of(
+            ctvHash,
+            ctvScript.getProgram()
+        )
+        // In bitcoinj 0.17, use withWitness() which returns a new TransactionInput
+        // Only add the input once, with witness attached
+        val inputWithWitness = input.withWitness(witness)
+        tx.addInput(inputWithWitness)
         
         // Add outputs
         for (output in outputs) {

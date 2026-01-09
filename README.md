@@ -208,3 +208,247 @@ If you see dependency resolution errors:
 cd mobile
 ./gradlew --refresh-dependencies
 ```
+
+---
+
+## Testing
+
+### API Endpoint Testing
+
+The Ktor server provides REST API endpoints that can be tested using `curl` or any HTTP client. All endpoints return JSON responses.
+
+#### Prerequisites
+
+1. **Start the server**:
+   ```bash
+   cd mobile
+   ./gradlew :server:run
+   ```
+
+2. **Verify server is running**:
+   The server should be accessible at `http://localhost:8080`
+
+#### Test Cases
+
+##### Test 1: Vaulting Endpoint
+
+Creates a new vault and returns the vault address.
+
+```bash
+curl -X POST http://localhost:8080/vaults/vaulting \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "1000000",
+    "coldAddress": "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef",
+    "hotAddress": "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef",
+    "blockDelay": 144,
+    "network": "testnet",
+    "taproot": false
+  }' | python3 -m json.tool
+```
+
+**Expected Response**:
+```json
+{
+    "vault": "{\"hotAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"coldAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"amount\":\"1000000\",\"network\":\"testnet\",\"blockDelay\":144,\"taproot\":false}",
+    "address": "mgDrrGRPouPXEWhgzuwDXQZRovnNv1GF5x"
+}
+```
+
+**Save the `vault` JSON value for the next test.**
+
+---
+
+##### Test 2: Unvaulting Endpoint
+
+Creates an unvaulting transaction that moves funds from the vault to an unvault address.
+
+```bash
+# Replace YOUR_VAULT_JSON with the vault JSON from Test 1
+curl -X POST http://localhost:8080/vaults/unvaulting \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": YOUR_VAULT_JSON,
+    "txid": "0000000000000000000000000000000000000000000000000000000000000000",
+    "vout": 0
+  }' | python3 -m json.tool
+```
+
+**Expected Response**:
+```json
+{
+    "vault": "...",
+    "script": "63029000b2751f01f427d7b0a6334728a5dc3b1b3d92f1e024ea7d9a430c41f29b1e33a4e59101dcb3671f43d591e156a317ac5010a620ef3c7001c53b459e60ba885fdbfbbe1bec34d201b7b368",
+    "tx": "01000000000102...",
+    "txid": "af20f98529569c929a0b0003e93519f73ebe8a20c6386838b690e516a6394929"
+}
+```
+
+**Save the `tx` (transaction hex) value for Test 3.**
+
+---
+
+##### Test 3: Vault Verification Endpoint
+
+Verifies that a transaction is valid for the given vault context. This is the main verification feature.
+
+```bash
+# Replace YOUR_VAULT_JSON and TRANSACTION_HEX with values from Tests 1 and 2
+curl -X POST http://localhost:8080/vaults/verification \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": YOUR_VAULT_JSON,
+    "tx": "TRANSACTION_HEX"
+  }' | python3 -m json.tool
+```
+
+**Expected Response** (for unvaulting transaction):
+```json
+{
+    "transactionType": "Unvaulting",
+    "valid": true,
+    "message": "Transaction is a valid unvaulting transaction"
+}
+```
+
+**Possible Transaction Types**:
+- `"Unvaulting"` - Transaction that moves funds from vault to unvault address
+- `"ColdSpend"` - Immediate spend transaction (no delay)
+- `"HotSpend"` - Delayed spend transaction (requires block delay)
+
+---
+
+##### Test 4: Simple CTV Locking Endpoint
+
+Creates a simple CTV locking script.
+
+```bash
+curl -X POST http://localhost:8080/simple/locking \
+  -H "Content-Type: application/json" \
+  -d '{
+    "outputs": "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef:100000:",
+    "network": "testnet",
+    "congestion": false,
+    "taproot": false
+  }' | python3 -m json.tool
+```
+
+**Expected Response**:
+```json
+{
+    "ctvHash": "3adad25eb3017fef93fef9613c1f1f3b93d32b680f2ba4946dab8a48abed1b2a",
+    "lockingScript": "PUSHDATA1[3adad25eb3017fef93fef9613c1f1f3b93d32b680f2ba4946dab8a48abed1b2a] NOP4",
+    "lockingHex": "4c203adad25eb3017fef93fef9613c1f1f3b93d32b680f2ba4946dab8a48abed1b2ab3",
+    "address": "n4eti5whH9GtLKABuJHFm226aSmb1kdARh",
+    "ctv": "{\"network\":\"testnet\",\"version\":1,\"locktime\":0,\"sequences\":[0],\"inputIndex\":0,\"ctvHash\":\"3adad25eb3017fef93fef9613c1f1f3b93d32b680f2ba4946dab8a48abed1b2a\",\"outputs\":[{\"amount\":99400,\"scriptPubKey\":\"76a914ccc198c15d8344c73da67a75509a85a8f422663688ac\"}]}"
+}
+```
+
+---
+
+##### Test 5: Vault Spending Endpoint
+
+Creates spending transactions (cold and hot) from an unvault transaction.
+
+```bash
+# First, get vault and unvault transaction (from Tests 1 and 2)
+# Then test spending:
+curl -X POST http://localhost:8080/vaults/spending \
+  -H "Content-Type: application/json" \
+  -d '{
+    "vault": YOUR_VAULT_JSON,
+    "txid": "UNVAULT_TXID_FROM_TEST_2",
+    "type": "cold"
+  }' | python3 -m json.tool
+```
+
+**Expected Response** (for cold spend):
+```json
+{
+    "vault": "...",
+    "coldTx": "01000000000101...",
+    "hotTx": "01000000000101..."
+}
+```
+
+---
+
+### Automated Test Script
+
+Save this as `test_all_endpoints.sh`:
+
+```bash
+#!/bin/bash
+
+echo "=== Test 1: Vaulting ==="
+VAULT_RESPONSE=$(curl -s -X POST http://localhost:8080/vaults/vaulting \
+  -H "Content-Type: application/json" \
+  -d '{
+    "amount": "1000000",
+    "coldAddress": "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef",
+    "hotAddress": "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef",
+    "blockDelay": 144,
+    "network": "testnet",
+    "taproot": false
+  }')
+echo "$VAULT_RESPONSE" | python3 -m json.tool
+echo ""
+
+VAULT_JSON=$(echo $VAULT_RESPONSE | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin)['vault']))")
+
+echo "=== Test 2: Unvaulting ==="
+UNVAULT_RESPONSE=$(curl -s -X POST http://localhost:8080/vaults/unvaulting \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"vault\": $VAULT_JSON,
+    \"txid\": \"0000000000000000000000000000000000000000000000000000000000000000\",
+    \"vout\": 0
+  }")
+echo "$UNVAULT_RESPONSE" | python3 -m json.tool
+echo ""
+
+TX_HEX=$(echo $UNVAULT_RESPONSE | python3 -c "import sys, json; print(json.load(sys.stdin)['tx'])")
+
+echo "=== Test 3: Vault Verification ==="
+curl -s -X POST http://localhost:8080/vaults/verification \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"vault\": $VAULT_JSON,
+    \"tx\": \"$TX_HEX\"
+  }" | python3 -m json.tool
+echo ""
+
+echo "=== Test 4: Simple CTV Locking ==="
+curl -s -X POST http://localhost:8080/simple/locking \
+  -H "Content-Type: application/json" \
+  -d '{
+    "outputs": "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef:100000:",
+    "network": "testnet",
+    "congestion": false,
+    "taproot": false
+  }' | python3 -m json.tool
+```
+
+Make it executable and run:
+```bash
+chmod +x test_all_endpoints.sh
+./test_all_endpoints.sh
+```
+
+---
+
+### Expected Test Results
+
+All tests should pass with the following results:
+
+- ✅ **Vaulting**: Returns vault JSON and address
+- ✅ **Unvaulting**: Returns transaction hex and txid
+- ✅ **Verification**: Returns `{"transactionType": "Unvaulting", "valid": true, ...}`
+- ✅ **Simple CTV**: Returns CTV hash and address
+- ✅ **Spending**: Returns cold and hot spend transactions
+
+### Notes
+
+- All endpoints use **testnet** addresses for testing
+- The verification endpoint can verify **Unvaulting**, **ColdSpend**, and **HotSpend** transaction types
+- Transaction hex values can be used with Bitcoin testnet explorers or testnet nodes
