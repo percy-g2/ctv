@@ -293,6 +293,30 @@ curl -X POST http://localhost:8080/vaults/unvaulting \
   }' | python3 -m json.tool
 ```
 
+**⚠️ IMPORTANT: About the `txid` Parameter**
+
+**For those who try to poke around without reading the code or understanding Bitcoin transactions:**
+
+The `txid` in the example above is all zeros (`0000...0000`) - **this is just a placeholder/test value** and is NOT a real transaction ID! If you're wondering "why is it all zeros?" or trying to use this in production without understanding what it means, **STOP** and read this section.
+
+**What `txid` actually represents:**
+- The `txid` is the **transaction ID of the transaction that funded your vault address**
+- It identifies the UTXO (unspent transaction output) that the unvaulting transaction will spend from
+- The `vout` parameter is the output index (usually `0`) of that transaction
+- This is a standard Bitcoin transaction input - if you don't understand UTXOs, go learn Bitcoin basics first
+
+**In a real scenario, you would:**
+1. Create a vault using `/vaults/vaulting` (Test 1) to get a vault address
+2. Send funds to that vault address using a Bitcoin transaction
+3. Get the transaction ID (`txid`) of that funding transaction from the blockchain
+4. Use that real `txid` (and correct `vout` index) in your unvaulting request
+
+**Why all zeros in the example?**
+- The all-zeros value is used for testing/demo purposes only
+- The endpoint accepts it to generate a transaction structure, but it won't correspond to a real spendable UTXO
+- For actual use, you MUST provide the real transaction ID of the transaction that funded your vault
+- **Don't copy-paste this example into production** - you'll be trying to spend from a non-existent transaction
+
 **Expected Response**:
 ```json
 {
