@@ -217,6 +217,8 @@ cd mobile
 
 The Ktor server provides REST API endpoints that can be tested using `curl` or any HTTP client. All endpoints return JSON responses.
 
+> **📋 Comprehensive Test Cases**: For detailed test cases with complete examples, expected responses, and an automated test script, see [VAULT_VERIFICATION_TEST_CASES.md](./VAULT_VERIFICATION_TEST_CASES.md).
+
 #### Prerequisites
 
 1. **Start the server**:
@@ -229,6 +231,23 @@ The Ktor server provides REST API endpoints that can be tested using `curl` or a
    The server should be accessible at `http://localhost:8080`
 
 #### Test Cases
+
+The test cases document includes comprehensive examples for all endpoints:
+
+- **Test Case 1**: Vaulting Endpoint - Creates a new vault and returns the vault address
+- **Test Case 2**: Unvaulting Endpoint - Creates an unvaulting transaction
+- **Test Case 3**: Vault Verification (Unvaulting) - Verifies unvaulting transactions
+- **Test Case 4**: Simple CTV Locking - Creates CTV locking scripts
+- **Test Case 5**: Vault Spending Endpoint - Creates cold and hot spending transactions
+- **Test Case 6**: Verify Cold Spend Transaction - Validates immediate spend transactions
+- **Test Case 7**: Verify Hot Spend Transaction - Validates delayed spend transactions
+
+The verification endpoint supports three transaction types:
+- **Unvaulting** - Transaction that moves funds from vault to unvault address
+- **ColdSpend** - Immediate spend transaction (no delay required)
+- **HotSpend** - Delayed spend transaction (requires block delay)
+
+See [VAULT_VERIFICATION_TEST_CASES.md](./VAULT_VERIFICATION_TEST_CASES.md) for complete curl examples, expected responses, and an automated test script.
 
 ##### Test 1: Vaulting Endpoint
 
@@ -441,14 +460,20 @@ chmod +x test_all_endpoints.sh
 
 All tests should pass with the following results:
 
-- ✅ **Vaulting**: Returns vault JSON and address
-- ✅ **Unvaulting**: Returns transaction hex and txid
-- ✅ **Verification**: Returns `{"transactionType": "Unvaulting", "valid": true, ...}`
-- ✅ **Simple CTV**: Returns CTV hash and address
-- ✅ **Spending**: Returns cold and hot spend transactions
+- ✅ **Test 1**: Vaulting Endpoint - Creates vault successfully
+- ✅ **Test 2**: Unvaulting Endpoint - Creates unvault transaction successfully
+- ✅ **Test 3**: Vault Verification (Unvaulting) - Verifies unvaulting transaction correctly
+- ✅ **Test 4**: Simple CTV Locking - Creates CTV lock successfully
+- ✅ **Test 5**: Vault Spending Endpoint - Creates spending transactions successfully
+- ✅ **Test 6**: Vault Verification (Cold Spend) - Verifies cold spend transaction correctly
+- ✅ **Test 7**: Vault Verification (Hot Spend) - Verifies hot spend transaction correctly
+
+For detailed test cases with complete request/response examples, see [VAULT_VERIFICATION_TEST_CASES.md](./VAULT_VERIFICATION_TEST_CASES.md).
 
 ### Notes
 
 - All endpoints use **testnet** addresses for testing
 - The verification endpoint can verify **Unvaulting**, **ColdSpend**, and **HotSpend** transaction types
 - Transaction hex values can be used with Bitcoin testnet explorers or testnet nodes
+- The verification endpoint validates transaction structure, witness data, and script compatibility
+- All endpoints return JSON responses with appropriate error handling
