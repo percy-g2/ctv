@@ -3,12 +3,15 @@ package com.gembotics.ctv.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gembotics.ctv.api.createCtvApi
 import com.gembotics.ctv.models.LockingRequest
+import com.gembotics.ctv.ui.components.AppBottomBar
 import com.gembotics.ctv.ui.components.OutputEntry
 import com.gembotics.ctv.ui.components.OutputEntryCard
 import com.gembotics.ctv.ui.components.OutputEntryValidator
@@ -18,9 +21,10 @@ import kotlinx.coroutines.launch
 @Composable
 fun SimpleLockingScreen(
     apiBaseUrl: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
-    var outputEntries by remember { mutableStateOf(listOf(OutputEntry())) }
+    var outputEntries by remember { mutableStateOf(listOf(OutputEntry(address = "mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef", amount = "100000", data = ""))) }
     var network by remember { mutableStateOf("testnet") }
     var congestion by remember { mutableStateOf(false) }
     var taproot by remember { mutableStateOf(false) }
@@ -56,10 +60,16 @@ fun SimpleLockingScreen(
                 title = { Text("Create Locking Script") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Text("←")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "back"
+                        )
                     }
                 }
             )
+        },
+        bottomBar = {
+            AppBottomBar(onSettingsClick = onSettingsClick)
         }
     ) { padding ->
         Column(

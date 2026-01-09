@@ -3,6 +3,8 @@ package com.gembotics.ctv.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,16 +13,18 @@ import androidx.compose.ui.unit.dp
 import com.gembotics.ctv.api.createCtvApi
 import com.gembotics.ctv.models.VaultVerificationRequest
 import com.gembotics.ctv.models.VaultVerificationResponse
+import com.gembotics.ctv.ui.components.AppBottomBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaultVerificationScreen(
     apiBaseUrl: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
-    var vaultContext by remember { mutableStateOf("") }
-    var txHex by remember { mutableStateOf("") }
+    var vaultContext by remember { mutableStateOf("{\"hotAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"coldAddress\":\"mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef\",\"amount\":\"1000000\",\"network\":\"testnet\",\"blockDelay\":144,\"taproot\":false}") }
+    var txHex by remember { mutableStateOf("0100000000010100000000000000000000000000000000000000000000000000000000000000000000000021002058626fd9e17eefcd16f7499f0b2687ba359692838b702e185c144d894ae3e4ffffffff01e83f0f00000000001976a914432c6152a179b6988757eaf7733693e1bceb425888ac02203a4074350970f6314f6c95fa881a55ddf51c68768c8c3d9033db8016e02eb3f6234c203a4074350970f6314f6c95fa881a55ddf51c68768c8c3d9033db8016e02eb3f6b300000000") }
     var isLoading by remember { mutableStateOf(false) }
     var result by remember { mutableStateOf<VaultVerificationResponse?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -34,10 +38,16 @@ fun VaultVerificationScreen(
                 title = { Text("Verify Vault Transaction") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Text("←")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "back"
+                        )
                     }
                 }
             )
+        },
+        bottomBar = {
+            AppBottomBar(onSettingsClick = onSettingsClick)
         }
     ) { padding ->
         Column(

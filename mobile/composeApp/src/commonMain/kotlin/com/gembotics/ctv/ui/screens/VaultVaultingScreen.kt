@@ -3,23 +3,27 @@ package com.gembotics.ctv.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gembotics.ctv.api.createCtvApi
 import com.gembotics.ctv.models.VaultingRequest
+import com.gembotics.ctv.ui.components.AppBottomBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaultVaultingScreen(
     apiBaseUrl: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
-    var amount by remember { mutableStateOf("") }
-    var coldAddress by remember { mutableStateOf("") }
-    var hotAddress by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("1000000") }
+    var coldAddress by remember { mutableStateOf("mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef") }
+    var hotAddress by remember { mutableStateOf("mzBc4XEFSdzCDcTxAgf6EZXgsZWpztRhef") }
     var blockDelay by remember { mutableStateOf("144") }
     var network by remember { mutableStateOf("testnet") }
     var taproot by remember { mutableStateOf(false) }
@@ -38,10 +42,16 @@ fun VaultVaultingScreen(
                 title = { Text("Create Vault") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Text("←")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "back"
+                        )
                     }
                 }
             )
+        },
+        bottomBar = {
+            AppBottomBar(onSettingsClick = onSettingsClick)
         }
     ) { padding ->
         Column(

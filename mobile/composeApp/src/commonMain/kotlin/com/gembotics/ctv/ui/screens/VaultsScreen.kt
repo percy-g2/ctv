@@ -1,18 +1,22 @@
 package com.gembotics.ctv.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.gembotics.ctv.ui.components.AppBottomBar
 import com.gembotics.ctv.ui.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun VaultsScreen(
     onNavigate: (Screen) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -20,10 +24,16 @@ fun VaultsScreen(
                 title = { Text("CTV Vaults") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Text("←")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "back"
+                        )
                     }
                 }
             )
+        },
+        bottomBar = {
+            AppBottomBar(onSettingsClick = onSettingsClick)
         }
     ) { padding ->
         Column(
