@@ -2,6 +2,93 @@
 
 This is where I'm playing with OP_CTV things in Bitcoin
 
+## About BIP 119: CHECKTEMPLATEVERIFY
+
+**Author:** [Jeremy Rubin](https://github.com/JeremyRubin)  
+**Status:** Draft  
+**Type:** Standards Track  
+**Created:** 2019-01-06
+
+### Overview
+
+BIP 119 introduces the `OP_CHECKTEMPLATEVERIFY` (CTV) opcode, which enables the creation of **covenants** in Bitcoin Script. Covenants are restrictions on how bitcoins can be spent in the future, allowing for more controlled and predictable spending conditions.
+
+### What is OP_CHECKTEMPLATEVERIFY?
+
+`OP_CHECKTEMPLATEVERIFY` is a new Bitcoin Script opcode (opcode value `0xb3`) that verifies a spending transaction matches a predefined template structure. When executed, it:
+
+1. Checks that the top stack element is a 32-byte hash
+2. Computes the `DefaultCheckTemplateVerifyHash` for the current transaction
+3. Compares the computed hash to the stack value
+4. Succeeds if they match, fails otherwise
+
+### How It Works
+
+The CTV hash commits to specific transaction fields:
+- **Transaction Version** (`nVersion`)
+- **Locktime** (`nLocktime`)
+- **Input Count** and **Sequence Numbers**
+- **Output Count** and **Outputs** (addresses and amounts)
+- **Input Index** (which input is being validated)
+
+This ensures that funds locked with CTV can only be spent in transactions that exactly match the committed structure.
+
+### Key Features
+
+- **Non-Recursive Covenants**: Once spent, funds cannot be automatically re-locked into another CTV structure
+- **No Dynamic State**: All spend paths must be known when creating the CTV hash
+- **Fully Enumerated**: Complete predictability of all possible transaction outcomes
+
+### Use Cases
+
+1. **Congestion Control**: Pre-commit to transaction structures to reduce on-chain congestion
+2. **Vaults**: Create time-locked vaults with multiple spend paths:
+   - **Cold Storage Path**: Immediate spend (no delay)
+   - **Hot Wallet Path**: Delayed spend (requires block delay)
+3. **Payment Channels**: Enable non-interactive payment channels and improve Lightning Network functionality
+4. **Self-Custody Solutions**: Enhanced security models for self-custody wallets
+5. **Layer-2 Applications**: Support for advanced protocols like Ark
+
+### Technical Details
+
+**Opcode:** `OP_CHECKTEMPLATEVERIFY` (`0xb3`)  
+**Stack Operation:** `<hash32> OP_CHECKTEMPLATEVERIFY`  
+**Script Pattern:** `4c20<hash32>b3` (where `4c20` pushes 32 bytes, `b3` is CTV)
+
+The CTV hash is computed as:
+```
+DefaultCheckTemplateVerifyHash = SHA256(
+    nVersion || 
+    nLocktime || 
+    InputCount || 
+    SequencesHash || 
+    OutputCount || 
+    OutputsHash || 
+    InputIndex
+)
+```
+
+### Implementation Status
+
+As of 2025, BIP 119 has gained significant support within the Bitcoin development community:
+- **Proposal Date**: January 2019
+- **Status**: Draft (pending activation)
+- **Community Support**: 66+ Bitcoin developers and contributors have signed an open letter supporting BIP 119
+- **Activation**: Requires decentralized community consensus through Bitcoin's governance process
+
+### Testing BIP 119
+
+This project uses [Bitcoin Inquisition](https://github.com/bitcoin-inquisition/bitcoin) for testing CTV functionality on Signet or Regtest networks. Bitcoin Inquisition is a fork of Bitcoin Core that includes experimental opcodes like CTV.
+
+### Learn More
+
+- **Full BIP Specification**: See [BIP_119.md](./BIP_119.md) for complete technical details
+- **Official BIP Repository**: https://github.com/bitcoin/bips/blob/master/bip-0119.mediawiki
+- **Bitcoin Inquisition**: https://github.com/bitcoin-inquisition/bitcoin
+- **Author's GitHub**: https://github.com/JeremyRubin
+
+---
+
 ## TODO
 
 - [ ] Better output entry
