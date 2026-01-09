@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -8,13 +8,154 @@
       href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
     />
     <style>
-      :root {
-        --primary: #f4511e !important;
+      /* Navy Blue Theme - Light Mode */
+      :root,
+      [data-theme="light"] {
+        --primary: #1e3a5f !important;
+        --primary-hover: #2c4a6b !important;
+        --primary-focus: rgba(30, 58, 95, 0.25) !important;
+        --primary-inverse: #ffffff !important;
+        
+        --background-color: #f5f9fc !important;
+        --color: #0a1628 !important;
+        
+        --h1-color: #1e3a5f !important;
+        --h2-color: #2c4a6b !important;
+        --h3-color: #1e3a5f !important;
+        --h4-color: #2c4a6b !important;
+        --h5-color: #1e3a5f !important;
+        --h6-color: #2c4a6b !important;
+        
+        --muted-border-color: #d6e8f5 !important;
+        --muted-color: #4a90e2 !important;
+        
+        --code-background-color: #e3f2fd !important;
+        --code-color: #0a1628 !important;
+        
+        --blockquote-border-color: #1e3a5f !important;
+        --mark-background-color: #d6e8f5 !important;
+        --mark-color: #0a1628 !important;
+        
+        --ins-color: #0a1628 !important;
+        --del-color: #c62828 !important;
+        
+        --button-box-shadow: 0 0 0 rgba(30, 58, 95, 0) !important;
+        --button-hover-box-shadow: 0 0 0 rgba(30, 58, 95, 0) !important;
+        
+        --form-element-background-color: #ffffff !important;
+        --form-element-border-color: #d6e8f5 !important;
+        --form-element-color: #0a1628 !important;
+        --form-element-placeholder-color: #4a90e2 !important;
+        --form-element-active-background-color: #ffffff !important;
+        --form-element-active-border-color: #1e3a5f !important;
+        --form-element-focus-color: rgba(30, 58, 95, 0.25) !important;
+        --form-element-disabled-background-color: #e3f2fd !important;
+        --form-element-disabled-border-color: #d6e8f5 !important;
+        --form-element-disabled-opacity: 0.5 !important;
+        --form-element-invalid-border-color: #c62828 !important;
+        --form-element-invalid-active-border-color: #c62828 !important;
+        --form-element-valid-border-color: #2c4a6b !important;
+        --form-element-valid-active-border-color: #2c4a6b !important;
+        
+        --switch-background-color: #d6e8f5 !important;
+        --switch-checked-background-color: #1e3a5f !important;
+        
+        --table-border-color: #d6e8f5 !important;
+        --table-row-stripped-background-color: #e3f2fd !important;
+        
+        --loading-spinner-opacity: 0.5 !important;
+        
+        --aria-label: "Close" !important;
+        --height: 1rem !important;
+        --width: 1rem !important;
+        
+        --textbox-icon-color: var(--muted-color) !important;
+        --textbox-icon-focus-color: var(--primary) !important;
+      }
+      
+      /* Navy Blue Theme - Dark Mode */
+      [data-theme="dark"] {
+        --primary: #4a90e2 !important;
+        --primary-hover: #6bb6ff !important;
+        --primary-focus: rgba(74, 144, 226, 0.25) !important;
+        --primary-inverse: #0a1628 !important;
+        
+        --background-color: #0a1628 !important;
+        --color: #e8f4f8 !important;
+        
+        --h1-color: #4a90e2 !important;
+        --h2-color: #6bb6ff !important;
+        --h3-color: #4a90e2 !important;
+        --h4-color: #6bb6ff !important;
+        --h5-color: #4a90e2 !important;
+        --h6-color: #6bb6ff !important;
+        
+        --muted-border-color: #1e3a5f !important;
+        --muted-color: #90caf9 !important;
+        
+        --code-background-color: #121f35 !important;
+        --code-color: #e8f4f8 !important;
+        
+        --blockquote-border-color: #4a90e2 !important;
+        --mark-background-color: #1e3a5f !important;
+        --mark-color: #e8f4f8 !important;
+        
+        --ins-color: #e8f4f8 !important;
+        --del-color: #ff6b6b !important;
+        
+        --button-box-shadow: 0 0 0 rgba(74, 144, 226, 0) !important;
+        --button-hover-box-shadow: 0 0 0 rgba(74, 144, 226, 0) !important;
+        
+        --form-element-background-color: #121f35 !important;
+        --form-element-border-color: #1e3a5f !important;
+        --form-element-color: #e8f4f8 !important;
+        --form-element-placeholder-color: #90caf9 !important;
+        --form-element-active-background-color: #121f35 !important;
+        --form-element-active-border-color: #4a90e2 !important;
+        --form-element-focus-color: rgba(74, 144, 226, 0.25) !important;
+        --form-element-disabled-background-color: #1e3a5f !important;
+        --form-element-disabled-border-color: #1e3a5f !important;
+        --form-element-disabled-opacity: 0.5 !important;
+        --form-element-invalid-border-color: #ff6b6b !important;
+        --form-element-invalid-active-border-color: #ff6b6b !important;
+        --form-element-valid-border-color: #4a90e2 !important;
+        --form-element-valid-active-border-color: #4a90e2 !important;
+        
+        --switch-background-color: #1e3a5f !important;
+        --switch-checked-background-color: #4a90e2 !important;
+        
+        --table-border-color: #1e3a5f !important;
+        --table-row-stripped-background-color: #121f35 !important;
+        
+        --loading-spinner-opacity: 0.5 !important;
+        
+        --textbox-icon-color: var(--muted-color) !important;
+        --textbox-icon-focus-color: var(--primary) !important;
       }
     </style>
     <title>CTV Playground</title>
+    <script>
+      // Apply theme on page load from cookie
+      (function() {
+        function getCookie(name) {
+          const value = `; ${document.cookie}`;
+          const parts = value.split(`; ${name}=`);
+          if (parts.length === 2) return parts.pop().split(';').shift();
+          return null;
+        }
+        
+        const theme = getCookie('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
+    <nav>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/settings">Settings</a></li>
+      </ul>
+    </nav>
     <main class="container">
       <h1>CTV Playground</h1>
       {% block content %}{% endblock %}

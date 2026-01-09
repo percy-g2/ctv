@@ -3,19 +3,23 @@ package com.gembotics.ctv.ui.screens
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.gembotics.ctv.api.createCtvApi
 import com.gembotics.ctv.models.SpendingRequest
+import com.gembotics.ctv.ui.components.AppBottomBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SimpleSpendingScreen(
     apiBaseUrl: String,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     var ctvContext by remember { mutableStateOf("") }
     var txid by remember { mutableStateOf("") }
@@ -33,10 +37,16 @@ fun SimpleSpendingScreen(
                 title = { Text("Create Spending Transaction") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Text("←")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBackIosNew,
+                            contentDescription = "back"
+                        )
                     }
                 }
             )
+        },
+        bottomBar = {
+            AppBottomBar(onSettingsClick = onSettingsClick)
         }
     ) { padding ->
         Column(

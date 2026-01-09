@@ -4,6 +4,7 @@ use axum::Router;
 use tokio::net::TcpListener;
 use tracing_subscriber::EnvFilter;
 
+mod settings;
 mod simple;
 mod vaults;
 
@@ -14,6 +15,8 @@ pub async fn server() -> anyhow::Result<()> {
 
     let app = Router::new()
         .route("/", axum::routing::get(index))
+        .route("/settings", axum::routing::get(settings::get_settings))
+        .route("/settings", axum::routing::post(settings::post_settings))
         .route("/simple", axum::routing::get(simple::index))
         .route("/simple/locking", axum::routing::post(simple::locking))
         .route("/simple/spending", axum::routing::post(simple::spending))
